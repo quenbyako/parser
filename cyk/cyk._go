@@ -1,20 +1,13 @@
 package cyk
 
 import (
-	"fmt"
 	"os"
 	"reflect"
 	"runtime/debug"
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
-	"github.com/quenbyako/parser/grammar"
 )
-
-type Node interface {
-	fmt.Stringer
-	Name() ebnf.IdentNoEpsilon
-}
 
 func selectNode(s ebnf.Ident, n Node) bool {
 	name := n.Name()
@@ -163,7 +156,7 @@ type Matrix struct {
 	doubleRules []ruleDouble
 	singleRules []ruleSingle
 
-	table         map[xy][]Node
+	table         map[XY][]Node
 	maxTableIndex uint
 }
 
@@ -184,7 +177,7 @@ func NewMatrix(terms [][]Terminal, grammar ebnf.RuleSet) *Matrix {
 	m := &Matrix{
 		doubleRules:   dr,
 		singleRules:   sr,
-		table:         make(map[xy][]Node),
+		table:         make(map[XY][]Node),
 		maxTableIndex: uint(len(terms) - 1),
 	}
 
@@ -212,16 +205,16 @@ func (m *Matrix) CalculateLine(line int) {
 	}
 
 	// todo: разобраться, а на кой черт нужны скобки? иначе не собирается
-	for pos := (xy{uint(line), 0}); pos.x <= m.maxTableIndex; pos = (xy{pos.x + 1, pos.y + 1}) {
+	for pos := (XY{uint(line), 0}); pos.x <= m.maxTableIndex; pos = (XY{pos.x + 1, pos.y + 1}) {
 		m.table[pos] = m.GetPossibleSelections(pos)
 	}
 }
 
-func (m *Matrix) GetPossibleSelections(pos xy) []Node {
+func (m *Matrix) GetPossibleSelections(pos XY) []Node {
 	var res []Node
 
 	// left является самым левым возможным в таблице значением. поскольку у нас таблица  отсечена по диагонали (с верхнего левого по нижнего правого угла)
-	left, bottom := xy{pos.y, pos.y}, xy{pos.x, pos.y + 1}
+	left, bottom := XY{pos.y, pos.y}, XY{pos.x, pos.y + 1}
 	nextCoords := func() {
 		left.x++
 		bottom.y++
@@ -283,7 +276,7 @@ func (m *Matrix) getAllSingleChainNodes(n Node) []Node {
 
 // GetEndNodes возвращает возможные деревья которые удалось распарсить
 func (m *Matrix) GetEndNodes() []Node {
-	return m.table[xy{m.maxTableIndex, 0}]
+	return m.table[XY{m.maxTableIndex, 0}]
 }
 
 // PrintTable выводит дебаг информацию о том, какие ноды в ячейках находятся на текущий момент
@@ -339,11 +332,11 @@ func (m *Matrix) fillTerminals(t [][]Terminal) {
 }
 
 func (m *Matrix) push(x, y int, nodes ...Node) {
-	m.table[xy{uint(x), uint(y)}] = append(m.get(x, y), nodes...)
+	m.table[XY{uint(x), uint(y)}] = append(m.get(x, y), nodes...)
 }
 
 func (m *Matrix) get(x, y int) []Node {
-	nodes, ok := m.table[xy{uint(x), uint(y)}]
+	nodes, ok := m.table[XY{uint(x), uint(y)}]
 	if !ok {
 		return []Node{}
 	}

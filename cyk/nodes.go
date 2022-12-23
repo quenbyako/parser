@@ -1,61 +1,33 @@
 package cyk
 
 import (
-	"fmt"
-	"strings"
+	"text/scanner"
 
-	"github.com/quenbyako/parser/ebnf"
+	"github.com/quenbyako/parser/grammar"
 )
 
-// Terminal это конечная возможная нода. Собственно, терминал.
+// Terminal это конечная нода. Собственно, терминал.
 type Terminal struct {
-	ebnf.IdentNoEpsilon
-
-	Obj fmt.Stringer
+	scanner.Position
+	Type  grammar.Ident // ident name
+	Value string
 }
 
-func (t Terminal) String() string            { return t.Obj.String() }
-func (t Terminal) Name() ebnf.IdentNoEpsilon { return t.IdentNoEpsilon }
-
-// RawNonTerminal это тот терминал, который генерирует алгоритм cyk, то есть буквально сырой терминал, который
-// не сжат, не преобразован, и является оригинальным нетерминалом, который согласно алгоритму был сгенерирован
-type RawNonTerminal struct {
-	ebnf.IdentNoEpsilon
-
-	Left  Node
-	Right Node
-}
-
-func (t RawNonTerminal) String() string            { return t.Left.String() + t.Right.String() }
-func (t RawNonTerminal) Name() ebnf.IdentNoEpsilon { return t.IdentNoEpsilon }
-
-// NonTerminal это фактический нетерминал, который отдает в ответе парсер. в отличии от RawNonTerminal этот
-// тип уже не предполагает наличия в дереве сгенерированных нетерминалов
+// NonTerminal это тот терминал, который генерирует алгоритм cyk, то есть
+// буквально сырой терминал, который не сжат, не преобразован, и является
+// оригинальным нетерминалом, который согласно алгоритму был сгенерирован
 type NonTerminal struct {
-	ebnf.IdentNoEpsilon
+	I grammar.Ident
 
-	Nodes []Node
+	// ВАЖНО: если вы пытаетесь дернуть кординаты у нетерминала, который
+	// находится в диагональной ячейке (где координаты x==y) то координаты
+	// будут пустыми. остальные нетерминалы обязаны иметь координаты
+	Left   NonTerminalCoord
+	Bottom NonTerminalCoord
 }
 
-func (t NonTerminal) Name() ebnf.IdentNoEpsilon { return t.IdentNoEpsilon }
-func (t NonTerminal) String() string {
-	res := make([]string, len(t.Nodes))
-	for i, node := range t.Nodes {
-		res[i] = node.String()
-	}
 
-	return strings.Join(res, "")
+type NonTerminalCoord struct {
+	XY
+	Index int
 }
-
-// SingleNonTerminal это переходный нетерминал для корректной работы алгоритма. проблема в том, что существует
-// некоторые грамматики, которые содержат в себе лишь один селектор. что бы не модифицировать алгоритм, в ту
-// же самую ячейку записывается одиночный нетерминал, который записывается в ту же самую ячейку. это позволяет
-// сохранить возможность наличия в нетерминале лишь одного элемента
-type SingleNonTerminal struct {
-	ebnf.IdentNoEpsilon
-
-	Node Node
-}
-
-func (t SingleNonTerminal) String() string            { return t.Node.String() }
-func (t SingleNonTerminal) Name() ebnf.IdentNoEpsilon { return t.IdentNoEpsilon }
