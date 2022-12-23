@@ -1,0 +1,47 @@
+
+
+
+
+result = [start] expression [end];
+
+
+start = "starts with"; (* /^.../ *)
+end = "must end"; (* /...$/ *)
+
+expression = "";
+
+
+
+literally = "literally" string | string ; (* /"x"/ *)
+oneOf = "one of " string; (* /[xyz]/ *)
+
+
+group = element { "," element };
+
+element = literally | oneOf ;
+
+or = "or";
+
+
+
+
+optional     = "optional";                          (* /...?/     *)
+onceOrMore   = "once or more";                      (* /...+/     *)
+neverOrMore  = "never or more";                     (* /...*/     *)
+exactlyTimes = "exactly" int "times";               (* /...{x}/   *)
+betweenTimes = "between" int "and" int "times";     (* /...{x,y}/ *)
+atLeastTimes = "at least" int "times";              (* /...{x,}/  *)
+atMostTimes  = "at most" int "times";               (* /...{0,y}/  *)
+
+
+int = digit {digit};
+
+
+
+any = "any"; (* . *)
+tab = "tab"; (* \t *)
+newline = "newline"; (* \n *)
+whitespace = "whitespace"; (* \s *)
+anyChar = "any character"; (* \w *)
+
+

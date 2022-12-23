@@ -1,0 +1,9 @@
+sentence
+    : [article] adjective verb
+    | [article] adjective noun verb
+    | noun verb conjunction noun verb "!!!"
+    | nounVerb noun
+    | article nounVerb noun
+    ;
+
+nounVerb : noun verb<intransitive> ;

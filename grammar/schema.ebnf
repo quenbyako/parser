@@ -1,0 +1,21 @@
+
+Production : Ident "=" Expression ";" ;
+Expression : Sequence { "|" Sequence } ;
+Sequence   : Term { Term } ;
+Term: Ident
+    | token [ "..." token ]
+    | Group
+    | Option
+    | Repetition
+    ;
+Group       : "(" Expression ")" ;
+Option      : "[" Expression "]" ;
+Repetition  : "{" Expression "}" ;
+
+
+
+Ident : name [ "<" IdentItem { IdentItem }  ">" ] ;
+IdentItem
+    : name
+    | name "=" ( name | string )
+    ;
